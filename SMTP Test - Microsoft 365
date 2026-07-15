@@ -1,0 +1,60 @@
+# ==========================
+# SMTP Test - Microsoft 365
+# ==========================
+
+# Settings
+$SMTPServer = "smtp.office365.com"
+$SMTPPort   = 587
+
+$Username = "user@company.cz"
+$Password = "PASSWORD"
+
+$From = "user@company.cz"
+$To   = "test@company.cz"
+
+$Subject = "SMTP Test Microsoft 365"
+$Body = @"
+This is a test email.
+
+Date: $(Get-Date)
+
+If this email arrived, SMTP is working properly.
+"@
+
+# Password transfer
+$SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+$Credential = New-Object System.Management.Automation.PSCredential ($Username,$SecurePassword)
+
+try {
+
+    Send-MailMessage `
+        -From $From `
+        -To $To `
+        -Subject $Subject `
+        -Body $Body `
+        -SmtpServer $SMTPServer `
+        -Port $SMTPPort `
+        -UseSsl `
+        -Credential $Credential `
+        -ErrorAction Stop
+
+    Write-Host ""
+    Write-Host "===================================" -ForegroundColor Green
+    Write-Host "SMTP TEST SUCCESSFUL" -ForegroundColor Green
+    Write-Host "===================================" -ForegroundColor Green
+}
+catch {
+
+    Write-Host ""
+    Write-Host "===================================" -ForegroundColor Red
+    Write-Host "SMTP TEST FAILED" -ForegroundColor Red
+    Write-Host "===================================" -ForegroundColor Red
+
+    Write-Host $_.Exception.Message -ForegroundColor Yellow
+
+    if ($_.Exception.InnerException) {
+        Write-Host ""
+        Write-Host "Inner Exception:"
+        Write-Host $_.Exception.InnerException.Message
+    }
+}
